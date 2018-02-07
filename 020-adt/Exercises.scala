@@ -1,8 +1,8 @@
 // Advanced Programming 2018,
 // A. Wąsowski, Z.Fu. IT University of Copenhagen
 //
-// AUTHOR1:
-// AUTHOR2:
+// AUTHOR1: matho@itu.dk
+// AUTHOR2: mrom@itu.dk
 //
 // Write names and ITU email addresses of both group members that contributed to
 // the solution of the exercise (in alphabetical order by family name).
@@ -50,19 +50,33 @@ object List {
 
   // Exercise 2
 
-  // def tail[A] (as: List[A]) :List[A] = ...
+  def tail[A] (as: List[A]) :List[A] = as match{
+    case Nil => Nil
+    case Cons(x, xs) => xs
+  }
 
   // Exercise 3
 
-  // def drop[A] (l: List[A], n: Int) : List[A] = ...
-
+  def drop[A] (l: List[A], n: Int) : List[A] = l match{
+    case Nil => Nil
+    case Cons(_,xs) if n > 0 => drop(xs, n-1)
+    case Cons(_,xs) => xs
+  }
   // Exercise 4
 
-  // def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ...
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Nil => Nil
+    case Cons(x,xs) if f(x) => dropWhile(xs,f)
+    case Cons(x,_) if !f(x) => l
+  }
 
   // Exercise 5
 
-  // def init[A](l: List[A]): List[A] = ...
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case Cons(x,Nil) => Nil
+    case Cons(x,xs) => Cons(x, init(xs))
+  }
 
   // Exercise 6
 
@@ -71,11 +85,16 @@ object List {
     case Cons (x,xs) => f (x, foldRight (xs,z) (f))
   }
 
-  // def length[A] (as: List[A]): Int = ...
+  def length[A] (as: List[A]): Int = foldRight(as,0)((_,x) => x+1)
 
   // Exercise 7
 
-  // def foldLeft[A,B] (as: List[A], z: B) (f: (B, A) => B) : B = ...
+  @annotation.tailrec
+  def foldLeft[A,B] (as: List[A], z: B) (f: (B, A) => B) : B = as match {
+    case Nil => z
+    case Cons(x,xs) => foldLeft(xs,f(z,x))(f)
+  }
+  
 
   // Exercise 8
 
