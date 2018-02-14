@@ -166,19 +166,27 @@ object List {
   }
 
   // Exercise 17
-  /*
-  def hasSubsequence[A] (sup: List[A], sub: List[A]) :Boolean = sup match {
-    case Nil => False
-    case (x,xs) => sub match {
-      case Nil => True
-      case(y,ys) => if(y != x){
-        hasSubsequence(xs,sub)
-      } else {
-        hasSubsequence
+  
+  def isSubsequence[A] (sup: List[A], sub: List[A]) :Boolean = 
+    sup match {
+      case Nil => false
+      case Cons(x,xs) => sub match {
+        case Nil => true
+        case Cons(y,ys) => if(y == x){
+          isSubsequence(xs,ys)
+        } else {
+          false
+        }
       }
     }
-  }
-  */
+
+  def hasSubsequence[A] (sup: List[A], sub: List[A]) :Boolean =
+    if(isSubsequence(sup,sub)){
+      true
+    } else {
+      hasSubsequence(tail(sup),sub)
+    }
+
   // Exercise 18
 
   // def pascal (n :Int) : List[Int] = ...
