@@ -104,7 +104,7 @@ object List {
 
   // Exercise 9
 
-  def reverse[A] (as :List[A]) :List[A] = foldRight (as, List[A]()) ((b,a) => Cons(b,a))
+  def reverse[A] (as :List[A]) :List[A] = foldLeft (as, List[A]()) ((b,a) => Cons(a,b))
 
   // Exercise 10
 
@@ -156,12 +156,28 @@ object List {
 
   // Exercise 16
 
-  // def zipWith[A,B,C] (f : (A,B)=>C) (l: List[A], r: List[B]) : List[C] = ...
+  def zipWith[A,B,C] (f : (A,B)=>C) (l: List[A], r: List[B]) : List[C] = l match {
+    case Nil => List[C]()
+    case Cons(x,xs) => r match {
+      case Nil => List[C]()
+      case Cons(y,ys) => Cons(f(x,y),zipWith(f)(xs,ys))
+    }
+  }
 
   // Exercise 17
-
-  // def hasSubsequence[A] (sup: List[A], sub: List[A]) :Boolean = ...
-
+  /*
+  def hasSubsequence[A] (sup: List[A], sub: List[A]) :Boolean = sup match {
+    case Nil => False
+    case (x,xs) => sub match {
+      case Nil => True
+      case(y,ys) => if(y != x){
+        hasSubsequence(xs,sub)
+      } else {
+        hasSubsequence
+      }
+    }
+  }
+  */
   // Exercise 18
 
   // def pascal (n :Int) : List[Int] = ...
