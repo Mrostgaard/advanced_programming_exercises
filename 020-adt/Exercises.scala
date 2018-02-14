@@ -98,12 +98,13 @@ object List {
 
   // Exercise 8
 
-  // def product (as :List[Int]) : Int = ...
-  // def length1 (as :List[Int]) : Int = ...
+  def product (as :List[Int]) : Int = foldLeft (as,1) ((a,b) => a*b)
+
+  def length1 (as :List[Int]) : Int = foldLeft (as,0) ((a,_) => a+1)
 
   // Exercise 9
 
-  // def reverse[A] (as :List[A]) :List[A] = ...
+  def reverse[A] (as :List[A]) :List[A] = foldRight (as, List[A]()) ((b,a) => Cons(b,a))
 
   // Exercise 10
 
