@@ -104,7 +104,7 @@ object List {
 
   // Exercise 9
 
-  def reverse[A] (as :List[A]) :List[A] = foldRight (as, List[A]()) ((b,a) => Cons(b,a))
+  def reverse[A] (as :List[A]) :List[A] = foldLeft (as, List[A]()) ((b,a) => Cons(a,b))
 
   // Exercise 10
 
@@ -131,6 +131,7 @@ object List {
     } else {
       b
     })
+    //List.filter(*LIST*)((x :Int) => x % == 0)
 
   // Exercise 13
 
