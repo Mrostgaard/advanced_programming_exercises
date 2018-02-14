@@ -142,11 +142,17 @@ object List {
 
   // Exercise 14
 
-  // def filter1[A] (l: List[A]) (p: A => Boolean) :List[A] = ...
+  def filter1[A] (l: List[A]) (p: A => Boolean) :List[A] = flatMap(l)(x => if(p(x)) Cons(x,Nil) else Nil)
 
   // Exercise 15
 
-  // def add (l: List[Int]) (r: List[Int]): List[Int] = ...
+  def add (l: List[Int]) (r: List[Int]): List[Int] = l match {
+    case Nil => List[Int]()
+    case Cons(x,xs) => r match {
+      case Nil => List[Int]()
+      case Cons(y,ys) => Cons(x+y,add(xs)(ys))
+    }
+  }
 
   // Exercise 16
 
