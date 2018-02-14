@@ -108,9 +108,10 @@ object List {
 
   // Exercise 10
 
-  // def foldRight1[A,B] (as: List[A], z: B) (f: (A, B) => B) : B = ...
+  def foldRight1[A,B] (as: List[A], z: B) (f: (A, B) => B) : B = foldLeft(reverse(as),z)((B,A) => f(A,B))
 
-  // def foldLeft1[A,B] (as: List[A], z: B) (f: (B,A) => B) : B = ...
+  //TODO: Figure this out
+  //def foldLeft1[A,B] (as: List[A], z: B) (f: (B,A) => B) : B = foldRight(as, z)((B,A) => )
 
   // Exercise 11
 
@@ -119,15 +120,25 @@ object List {
     case Cons(h,t) => Cons(h, append(t, a2))
   }
 
-  // def concat[A] (as: List[List[A]]) :List[A] = ..
+  def concat[A] (as: List[List[A]]) :List[A] = foldLeft (as, List[A]()) ((b,a) => append(b,a))
 
   // Exercise 12
 
-  // def filter[A] (as: List[A]) (f: A => Boolean) : List[A] = ...
+  def filter[A] (as: List[A]) (f: A => Boolean) : List[A] = foldLeft(as, List[A]()) ((b,a) =>
+    if(f(a))
+    {
+      Cons(a,b)
+    } else {
+      b
+    })
 
   // Exercise 13
 
-  // def flatMap[A,B](as: List[A])(f: A => List[B]) : List[B] = ...
+  def flatMap[A,B](as: List[A])(f: A => List[B]) : List[B] = as match {
+    case Nil => List[B]()
+    case Cons(x,Nil) => f(x)
+    case Cons(x,xs) => append(f(x),flatMap(xs)(f))
+  }
 
   // Exercise 14
 
