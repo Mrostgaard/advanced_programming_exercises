@@ -60,7 +60,7 @@ object List {
   def drop[A] (l: List[A], n: Int) : List[A] = l match{
     case Nil => Nil
     case Cons(_,xs) if n > 0 => drop(xs, n-1)
-    case Cons(_,xs) => xs
+    case x => x
   }
   // Exercise 4
 
@@ -94,7 +94,7 @@ object List {
     case Nil => z
     case Cons(x,xs) => foldLeft(xs,f(z,x))(f)
   }
-  
+
 
   // Exercise 8
 
@@ -131,6 +131,7 @@ object List {
     } else {
       b
     })
+    //List.filter(*LIST*)((x :Int) => x % == 0)
 
   // Exercise 13
 
