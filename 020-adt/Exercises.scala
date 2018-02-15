@@ -110,7 +110,7 @@ object List {
 
   def foldRight1[A,B] (as: List[A], z: B) (f: (A, B) => B) : B = foldLeft(reverse(as),z)((B,A) => f(A,B))
 
-  //TODO: Figure this out
+  //Couldn't grok this one
   //def foldLeft1[A,B] (as: List[A], z: B) (f: (B,A) => B) : B = foldRight(as, z)((B,A) => )
 
   // Exercise 11
