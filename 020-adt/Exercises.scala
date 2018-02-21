@@ -110,7 +110,7 @@ object List {
 
   def foldRight1[A,B] (as: List[A], z: B) (f: (A, B) => B) : B = foldLeft(reverse(as),z)((B,A) => f(A,B))
 
-  //TODO: Figure this out
+  //Couldn't grok this one
   //def foldLeft1[A,B] (as: List[A], z: B) (f: (B,A) => B) : B = foldRight(as, z)((B,A) => )
 
   // Exercise 11
@@ -188,9 +188,24 @@ object List {
     }
 
   // Exercise 18
+  
+  def pascalStep (last : List[Int], current : List[Int]) : List[Int] = last match {
+      case Nil => current
+      case Cons(x,Nil) => append(current,Cons(1,Nil))
+      case Cons(x1,Cons(x2,xs)) => pascalStep(xs, append(current,Cons(x1+x2,Nil)))
+    }
 
-  // def pascal (n :Int) : List[Int] = ...
+  def pascalRec (l : List[Int]) (n :Int) : List[Int] =
+    if( n > 0) {
+      pascalRec(pascalStep(l, List[Int]()))(n-1)
+    } else {
+      l
+    }
 
-  // a test: pascal (4) = Cons(1,Cons(3,Cons(3,Cons(1,Nil))))
+  def pascal (n :Int) : List[Int] = 
+    pascalRec(Cons(1,Nil))(n)
+
+
+  pascal(4) == Cons(1,Cons(3,Cons(3,Cons(1,Nil))))
 
 }
