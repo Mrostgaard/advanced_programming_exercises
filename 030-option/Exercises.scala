@@ -1,7 +1,7 @@
 // Advanced Programming, A. Wąsowski, IT University of Copenhagen
 //
-// AUTHOR1:
-// AUTHOR2:
+// AUTHOR1: mrom
+// AUTHOR2: matho
 // Group number:
 //
 // Write names and ITU email addresses of both group members that contributed to
@@ -62,11 +62,19 @@ object Tree {
 
   // Exercise 2 (3.25)
 
-  // def size[A] (t :Tree[A]) :Int = ...
+  def size[A] (t :Tree[A]) :Int = t match{
+    case leaf:Leaf[A] => 1
+    case branch:Branch[A] => 1 + size(branch.right) + size(branch.left)
+  }
 
   // Exercise 3 (3.26)
 
-  // def maximum (t: Tree[Int]) :Int = ...
+  def maximum (t: Tree[Int]) :Int = t match {
+    case leaf:Leaf[A] => A
+    case branch:Branch[A] =>
+  }
+
+
 
   // Exercise 4 (3.28)
 
@@ -139,6 +147,7 @@ object Tests extends App {
    val q = new java.awt.Point(0,2) with OrderedPoint
    assert(p < q)
 
+
   // Notice how we are using nice infix comparison on java.awt
   // objects that were implemented way before Scala existed :) (And without the
   // library implementing a suitable comparator). We did not have to recompile
@@ -146,7 +155,7 @@ object Tests extends App {
 
 
   // Exercise 2
-  // assert (Tree.size (Branch(Leaf(1), Leaf(2))) == 3)
+   assert (Tree.size (Branch(Leaf(1), Leaf(2))) == 3)
   // Exercise 3
   // assert (Tree.maximum (Branch(Leaf(1), Leaf(2))) == 2)
   // Exercise 4
