@@ -70,41 +70,59 @@ object Tree {
   // Exercise 3 (3.26)
 
   def maximum (t: Tree[Int]) :Int = t match {
-    case leaf:Leaf[A] => A
-    case branch:Branch[A] =>
+    case leaf:Leaf[Int] => leaf.value
+    case branch:Branch[Int] => maximum(branch.right) max maximum(branch.left)
   }
-
-
 
   // Exercise 4 (3.28)
 
-  // def map[A,B] (t: Tree[A]) (f: A => B) : Tree[B] = ...
+  def map[A,B] (t: Tree[A]) (f: A => B) : Tree[B] = t match {
+    case leaf:Leaf[A] => Leaf(f(leaf.value))
+    case branch:Branch[A] => Branch(map(branch.left)(f),map(branch.right)(f))
+  }
 
   // Exercise 5 (3.29)
 
-  // def fold[A,B] (t: Tree[A]) (f: (B,B) => B) (g: A => B) :B = ...
+  def fold[A,B] (t: Tree[A]) (f: (B,B) => B) (g: A => B) :B = t match {
+    case leaf:Leaf[A] => g(leaf.value)
+    case branch:Branch[A] => f(fold(branch.left)(f)(g),fold(branch.right)(f)(g))
+  }
 
-  // def size1[A] ...
-  // def maximum1 ...
-  // def map1[A,B] ...
+  def size1[A] (t :Tree[A]) :Int = fold(t)((l:Int, r:Int) => l+r)((v) => 1)
+  def maximum1 (t :Tree[Int]) :Int = fold(t)((l:Int, r:Int) => l max r)(v => v)
+  def map1[A,B] (t: Tree[A]) (f: A => B) :Tree[B] = fold(t)((l:Tree[B], r:Tree[B]) => Branch(l,r):Tree[B])(v => Leaf(f(v)))
 
 }
 
 sealed trait Option[+A] {
 
   // Exercise 6 (4.1)
-
-  // def map[B] (f: A=>B) : Option[B] = ...
+  def map[B] (f: A=>B) : Option[B] = this match {
+    case None => None
+    case Some(x) => Some(f(x))
+  }
 
   // Ignore the arrow in default's type below for the time being.
   // (it should work (almost) as if it was not there)
 
-  // def getOrElse[B >: A] (default: => B) :B = ...
+  def getOrElse[B >: A] (default: => B) :B = this match {
+    case None => default
+    case Some(x) => x
+  }
 
-  // def flatMap[B] (f: A=>Option[B]) : Option[B] = ...
+  def flatMap[B] (f: A=>Option[B]) : Option[B] = this match {
+    case None => None
+    case Some(x) => f(x)
+  }
 
-  // def filter (f: A => Boolean) : Option[A] = ...
-
+  def filter (f: A => Boolean) : Option[A] = this match {
+    case None => None
+    case Some(x) => if(f(x)){
+      Some(x)
+    } else {
+      None
+    }
+  }
 }
 
 case class Some[+A] (get: A) extends Option[A]
@@ -120,15 +138,21 @@ object ExercisesOption {
 
   // Exercise 7 (4.2)
 
-  // def variance (xs: Seq[Double]) : Option[Double] = ..
+  def variance (xs: Seq[Double]) : Option[Double] = {
+    if(xs.isEmpty){None}
+    else{
+      val m = mean(xs)
+      mean(xs.map(x => math.pow(x - m.getOrElse(0.0), 2)))
+    }
+  }
 
   // Exercise 8 (4.3)
 
-  // def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C) :Option[C] =
+  // def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C) :Option[C] = ...
 
   // Exercise 9 (4.4)
 
-  // def sequence[A] (aos: List[Option[A]]) : Option[List[A]] = ...
+  def sequence[A] (aos: List[Option[A]]) : Option[List[A]] = aos.foldRight(List[A])((a:Option[A], b:List[A]) => b :: a )
 
   // Exercise 10 (4.5)
 
