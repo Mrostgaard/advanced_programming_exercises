@@ -88,7 +88,7 @@ object Tree {
     case branch:Branch[A] => f(fold(branch.left)(f)(g),fold(branch.right)(f)(g))
   }
 
-  def size1[A] (t :Tree[A]) :Int = fold(t)((l:Int, r:Int) => l+r)((v) => 1)
+  def size1[A] (t :Tree[A]) :Int = fold(t)((l:Int, r:Int) => l+r+1)((v) => 1)
   def maximum1 (t :Tree[Int]) :Int = fold(t)((l:Int, r:Int) => l max r)(v => v)
   def map1[A,B] (t: Tree[A]) (f: A => B) :Tree[B] = fold(t)((l:Tree[B], r:Tree[B]) => Branch(l,r):Tree[B])(v => Leaf(f(v)))
 
@@ -148,15 +148,17 @@ object ExercisesOption {
 
   // Exercise 8 (4.3)
 
-  // def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C) :Option[C] = ...
+  def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C) :Option[C] = ao.flatMap(a => bo.map( b => f(a,b)))
 
   // Exercise 9 (4.4)
 
-  def sequence[A] (aos: List[Option[A]]) : Option[List[A]] = aos.foldRight(List[A])((a:Option[A], b:List[A]) => b :: a )
+  def sequence[A] (aos: List[Option[A]]) : Option[List[A]] = aos.foldRight[Option[List[A]]](Some(Nil))((a,b) => map2(a, b)((x, xs) => x :: xs))
 
   // Exercise 10 (4.5)
 
-  // def traverse[A,B] (as: List[A]) (f :A => Option[B]) :Option[List[B]] =
+  def traverse[A,B] (as: List[A]) (f :A => Option[B]) :Option[List[B]] = as.foldRight[Option[List[B]]](Some(Nil))((a,b) => map2(f(a), b)((x, xs) => x :: xs))
+
+
 
 }
 
@@ -179,48 +181,49 @@ object Tests extends App {
 
 
   // Exercise 2
-   assert (Tree.size (Branch(Leaf(1), Leaf(2))) == 3)
+  assert (Tree.size (Branch(Leaf(1), Leaf(2))) == 3)
   // Exercise 3
-  // assert (Tree.maximum (Branch(Leaf(1), Leaf(2))) == 2)
+  assert (Tree.maximum (Branch(Leaf(1), Leaf(2))) == 2)
   // Exercise 4
-  // val t5 = Branch(Leaf("1"), Branch(Branch(Leaf("2"),Leaf("3")),Leaf("4")))
-  // assert (Tree.map (t4) (_.toString) == t5)
+  val t4 = Branch(Leaf(1), Branch(Branch(Leaf(2),Leaf(3)),Leaf(4)))
+  val t5 = Branch(Leaf("1"), Branch(Branch(Leaf("2"),Leaf("3")),Leaf("4")))
+  assert (Tree.map (t4) (_.toString) == t5)
 
   // Exercise 5
-  // assert (Tree.size1 (Branch(Leaf(1), Leaf(2))) == 3)
-  // assert (Tree.maximum1 (Branch(Leaf(1), Leaf(2))) == 2)
-  // assert (Tree.map1 (t4) (_.toString) == t5)
+  assert (Tree.size1 (Branch(Leaf(1), Leaf(2))) == 3)
+  assert (Tree.maximum1 (Branch(Leaf(1), Leaf(2))) == 2)
+  assert (Tree.map1 (t4) (_.toString) == t5)
 
   // Exercise 6
-  // assert (Some(1).map (x => x +1) == Some(2))
-  // assert (Some(41).getOrElse(42) == 41)
-  // assert (None.getOrElse(42) == 42)
-  // assert (Some(1).flatMap (x => Some(x+1)) == Some(2))
-  // assert ((None: Option[Int]).flatMap[Int] (x => Some(x+1)) == None)
-  // assert (Some(42).filter(_ == 42) == Some(42))
-  // assert (Some(41).filter(_ == 42) == None)
-  // assert ((None: Option[Int]).filter(_ == 42) == None)
+  assert (Some(1).map (x => x +1) == Some(2))
+  assert (Some(41).getOrElse(42) == 41)
+  assert (None.getOrElse(42) == 42)
+  assert (Some(1).flatMap (x => Some(x+1)) == Some(2))
+  assert ((None: Option[Int]).flatMap[Int] (x => Some(x+1)) == None)
+  assert (Some(42).filter(_ == 42) == Some(42))
+  assert (Some(41).filter(_ == 42) == None)
+  assert ((None: Option[Int]).filter(_ == 42) == None)
 
   // Exercise 7
-  // assert (ExercisesOption.variance (List(42,42,42)) == Some(0.0))
-  // assert (ExercisesOption.variance (List()) == None)
+  assert (ExercisesOption.variance (List(42,42,42)) == Some(0.0))
+  assert (ExercisesOption.variance (List()) == None)
 
 
   // Exercise 8
-  // assert (ExercisesOption.map2 (Some(42),Some(7)) (_ + _) == Some(49))
-  // assert (ExercisesOption.map2 (Some(42),None) (_ + _) == None)
-  // assert (ExercisesOption.map2 (None: Option[Int],Some(7)) (_ + _) == None)
-  // assert (ExercisesOption.map2 (None: Option[Int],None) (_ + _) == None)
+  assert (ExercisesOption.map2 (Some(42),Some(7)) (_ + _) == Some(49))
+  assert (ExercisesOption.map2 (Some(42),None) (_ + _) == None)
+  assert (ExercisesOption.map2 (None: Option[Int],Some(7)) (_ + _) == None)
+  assert (ExercisesOption.map2 (None: Option[Int],None) (_ + _) == None)
 
   // Exercise 9
-  // assert (ExercisesOption.sequence (List(Some(1), Some(2), Some(42))) == Some(List(1,2,42)))
-  // assert (ExercisesOption.sequence (List(None,    Some(2), Some(42))) == None)
-  // assert (ExercisesOption.sequence (List(Some(1), None,    Some(42))) == None)
-  // assert (ExercisesOption.sequence (List(Some(1), Some(2), None    )) == None)
+  assert (ExercisesOption.sequence (List(Some(1), Some(2), Some(42))) == Some(List(1,2,42)))
+  assert (ExercisesOption.sequence (List(None,    Some(2), Some(42))) == None)
+  assert (ExercisesOption.sequence (List(Some(1), None,    Some(42))) == None)
+  assert (ExercisesOption.sequence (List(Some(1), Some(2), None    )) == None)
 
   // Exercise 10
-  // def f (n: Int) :Option[Int] = if (n%2 == 0) Some(n) else None
-  // assert (ExercisesOption.traverse (List(1,2,42)) (Some(_)) == Some(List(1,2,42)))
-  // assert (ExercisesOption.traverse (List(1,2,42)) (f) == None)
+  def f (n: Int) :Option[Int] = if (n%2 == 0) Some(n) else None
+  assert (ExercisesOption.traverse (List(1,2,42)) (Some(_)) == Some(List(1,2,42)))
+  assert (ExercisesOption.traverse (List(1,2,42)) (f) == None)
 
 }
