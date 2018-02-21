@@ -1,7 +1,7 @@
 // Advanced Programming, A. Wąsowski, IT University of Copenhagen
 //
-// AUTHOR1: mrom
-// AUTHOR2: matho
+// AUTHOR1: matho
+// AUTHOR2: mrom
 // Group number:
 //
 // Write names and ITU email addresses of both group members that contributed to
