@@ -50,6 +50,7 @@ val headOption2 = naturals.drop(5).take(10).headOption()
 assert(headOption1 == Some(6))
 */
 //Exercise 8
+/*
 //1
 println(naturals.map(_*2).drop(30).take(50).toList)
 //2
@@ -60,3 +61,13 @@ println(naturals.take(10).append(naturals).take(20).toList)
 //4
 println(naturals.flatMap(to _).take(100).toList)
 println(naturals.flatMap(x => from(x)).take(100).toList)
+*/
+//Exercise 9
+/*
+In a list we would filter list first and then make the head of the list a headOption, in a stream we would look at the first element to pass through the filter and then make that a headOption.
+
+*/
+
+//Exercise 10
+val fibz = fibs.take(10).toList
+println(fibz)
