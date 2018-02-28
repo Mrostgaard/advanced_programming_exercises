@@ -83,6 +83,8 @@ sealed trait Stream[+A] {
 
   def filter(p: A => Boolean) :Stream[A] = this.foldRight(Stream[A]())((a,b) => if(p(a)) b else Stream.cons(a,b))
 
+  def append[B>:A](that: => Stream[B]) :Stream[B] = this.foldRight(that)((a,b) => Stream.cons(a,b))
+
 }
 
 
