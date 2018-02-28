@@ -57,7 +57,7 @@ sealed trait Stream[+A] {
 
   def take (n:Int) :Stream[A] = this match {
     case Empty => Empty
-    case Cons(h,t) => if(n <= 0) t() else Stream.cons(h,t().take(n-1))
+    case Cons(h,t) => if(n <= 0) t() else Stream.cons(h(),t().take(n-1))
   }
   
   def drop (n:Int) :Stream[A] = this match {
@@ -65,7 +65,8 @@ sealed trait Stream[+A] {
     case Cons(_,t) => if(n <= 0) t() else t().drop(n-1)
   }
 
-  def takeWhile(p: A => Boolean) :Stream[]
+  def takeWhile(p: A => Boolean) :Stream[A] = this match {
+  }
 }
 
 
@@ -91,10 +92,10 @@ object Stream {
     // Note 1: ":_*" tells Scala to treat a list as multiple params
     // Note 2: pattern matching with :: does not seem to work with Seq, so we
     //         use a generic function API of Seq
-  def to (n: Int): Stream[Int] = if(n > 0) Stream.cons(n, to(n-1))
-                                 else Stream.cons(0,Empty)
-  def from (n: Int): Stream[Int] = if(n > 0) Stream.cons(n, from(n+1))
-                                   else Stream.cons(0,Empty)
+  def to (n: Int): Stream[Int] = if(n >= 0) Stream.cons(n, to(n-1))
+                                 else Empty
+  def from (n: Int): Stream[Int] = if(n >= 0) Stream.cons(n, from(n+1))
+                                   else Empty
   val naturals = from(0)
   
 }
