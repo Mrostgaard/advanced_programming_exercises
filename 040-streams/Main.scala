@@ -18,7 +18,7 @@ println (l2.headOption)
 println (l3.headOption)
 
 
-val naturals = from(0).take(50).toList
+val naturals = from(0).take(5000000).toList
 println (naturals)
 
 val to10 = to(10).toList
@@ -26,3 +26,6 @@ val to20 = to(20).toList
 
 println(to10)
 println(to20)
+
+val naturals2 = naturals.takeWhile(_<1000000000).drop(100).take(50).toList
+println(naturals2)
