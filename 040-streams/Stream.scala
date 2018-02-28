@@ -38,7 +38,7 @@ sealed trait Stream[+A] {
       case Empty => z
       case Cons (h,t) => t().foldLeft (f (h(),z)) (f)
       // Note 2. even if f does not force z, foldLeft will continue to recurse
-    }
+    } 
 
   def exists (p : A => Boolean) :Boolean = this match {
       case Empty => false
@@ -74,6 +74,10 @@ sealed trait Stream[+A] {
     case Empty => true
     case Cons(h,t) => if(p(h())) t().forAll(p) else false
   }
+
+  def takeWhileFold(p: A => Boolean) :Stream[A] = this.foldRight(Stream[A]())((a,b) => if(p(a)) Stream.cons(a,b) else b)
+
+  def headOptionFold() :Option[A] = this.foldRight(None:Option[A])((a,b) => if(a != Empty) Some(a) else b)
 
 }
 
