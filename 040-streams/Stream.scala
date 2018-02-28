@@ -57,7 +57,7 @@ sealed trait Stream[+A] {
 
   def take (n:Int) :Stream[A] = this match {
     case Empty => Empty
-    case Cons(h,t) => if(n <= 0) t() else Stream.cons(h(),t().take(n-1))
+    case Cons(h,t) => if(n <= 0) Empty else Stream.cons(h(),t().take(n-1))
   }
   
   def drop (n:Int) :Stream[A] = this match {
@@ -66,7 +66,15 @@ sealed trait Stream[+A] {
   }
 
   def takeWhile(p: A => Boolean) :Stream[A] = this match {
+    case Empty => Empty
+    case Cons(h,t) => if(p(h())) Stream.cons(h(),t().takeWhile(p)) else t().takeWhile(p)
   }
+
+  def forAll(p: A => Boolean) :Boolean = this match {
+    case Empty => true
+    case Cons(h,t) => if(p(h())) t().forAll(p) else false
+  }
+
 }
 
 
@@ -94,8 +102,7 @@ object Stream {
     //         use a generic function API of Seq
   def to (n: Int): Stream[Int] = if(n >= 0) Stream.cons(n, to(n-1))
                                  else Empty
-  def from (n: Int): Stream[Int] = if(n >= 0) Stream.cons(n, from(n+1))
-                                   else Empty
+  def from (n: Int): Stream[Int] = Stream.cons(n, from(n+1))
   val naturals = from(0)
   
 }
