@@ -18,8 +18,8 @@ println (l2.headOption)
 println (l3.headOption)
 
 
-val naturals = from(0).take(5000000).toList
-println (naturals)
+val naturals = from(0)
+println (naturals.take(500).toList)
 
 val to10 = to(10).toList
 val to20 = to(20).toList
@@ -29,3 +29,7 @@ println(to20)
 
 val naturals2 = naturals.takeWhile(_<1000000000).drop(100).take(50).toList
 println(naturals2)
+//Because laizily evaluation will just drop the first 100 and then take the next 50 (101 -> 150) and turn that into the list
+
+assert(naturals.forAll(_ < 0))
+assert(naturals.forAll(_ >= 0))
