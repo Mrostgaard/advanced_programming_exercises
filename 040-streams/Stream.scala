@@ -57,13 +57,15 @@ sealed trait Stream[+A] {
 
   def take (n:Int) :Stream[A] = this match {
     case Empty => Empty
-    case Cons(h,t) => if(n <= 0) t() else Stream.cons(h(),t().take(n-1))
+    case Cons(h,t) => if(n <= 0) t() else Stream.cons(h,t().take(n-1))
   }
   
   def drop (n:Int) :Stream[A] = this match {
     case Empty => Empty
     case Cons(_,t) => if(n <= 0) t() else t().drop(n-1)
   }
+
+  def takeWhile(p: A => Boolean) :Stream[]
 }
 
 
