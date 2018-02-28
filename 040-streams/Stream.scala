@@ -50,6 +50,8 @@ sealed trait Stream[+A] {
     }
 
   //def find (p :A => Boolean) :Option[A] = this.filter (p).headOption
+  def from (n: Int): Stream[Int] = Stream.cons(n, from(n+1))
+
 }
 
 
