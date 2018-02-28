@@ -35,15 +35,28 @@ val naturals = from(0)
 //assert(naturals.forAll(_ >= 0))
 
 //Exercise 6
-//val naturals2 = naturals.takeWhileFold(_<1000000000).drop(100).take(50).toList
-//print(naturals2)
+/*
+val naturals2 = naturals.takeWhileFold(_<1000000000).drop(100).take(50).toList
+print(naturals2)
+*/
 
 //Exercise 7
+/*
 val headOptionNone = naturals.take(0).headOption()
 assert(headOptionNone == None)
 val headOption1 = naturals.take(10).headOption()
 assert(headOption1 == Some(0))
 val headOption2 = naturals.drop(5).take(10).headOption()
 assert(headOption1 == Some(6))
-
+*/
 //Exercise 8
+//1
+println(naturals.map(_*2).drop(30).take(50).toList)
+//2
+println(naturals.drop(42).filter(_%2 == 0).take(30).toList)
+//3
+println(naturals.append(naturals))
+println(naturals.take(10).append(naturals).take(20).toList)
+//4
+println(naturals.flatMap(to _).take(100).toList)
+println(naturals.flatMap(x => from(x)).take(100).toList)
