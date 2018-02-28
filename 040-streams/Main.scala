@@ -18,3 +18,11 @@ println (l2.headOption)
 println (l3.headOption)
 
 
+val naturals = from(0).take(50).toList
+println (naturals)
+
+val to10 = to(10).toList
+val to20 = to(20).toList
+
+println(to10)
+println(to20)
