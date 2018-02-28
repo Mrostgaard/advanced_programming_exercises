@@ -85,6 +85,7 @@ sealed trait Stream[+A] {
 
   def append[B>:A](that: => Stream[B]) :Stream[B] = this.foldRight(that)((a,b) => Stream.cons(a,b))
 
+  def flatMap[B](f: A => Stream[B]) :Stream[B] = this.foldRight(Stream[B]())((a,b) => f(a).append(b))
 }
 
 
