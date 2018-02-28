@@ -79,6 +79,10 @@ sealed trait Stream[+A] {
 
   def headOptionFold() :Option[A] = this.foldRight(None:Option[A])((a,b) => if(a != Empty) Some(a) else b)
 
+  def map[B](f: A => B) :Stream[B] = this.foldRight(Stream[B]())((a,b) => Stream.cons(f(a),b))
+
+  def filter(p: A => Boolean) :Stream[A] = this.foldRight(Stream[A]())((a,b) => if(p(a)) b else Stream.cons(a,b))
+
 }
 
 
@@ -104,10 +108,10 @@ object Stream {
     // Note 1: ":_*" tells Scala to treat a list as multiple params
     // Note 2: pattern matching with :: does not seem to work with Seq, so we
     //         use a generic function API of Seq
+  
   def to (n: Int): Stream[Int] = if(n >= 0) Stream.cons(n, to(n-1))
                                  else Empty
   def from (n: Int): Stream[Int] = Stream.cons(n, from(n+1))
-  val naturals = from(0)
   
 }
 
