@@ -55,6 +55,10 @@ sealed trait Stream[+A] {
     case Cons(h,t) => h() :: t().toList
   }
 
+  def take :Stream[A] = this match {
+    case Empty
+  }
+
 }
 
 
