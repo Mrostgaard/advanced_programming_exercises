@@ -38,7 +38,7 @@ sealed trait Stream[+A] {
       case Empty => z
       case Cons (h,t) => t().foldLeft (f (h(),z)) (f)
       // Note 2. even if f does not force z, foldLeft will continue to recurse
-    } 
+    }
 
   def exists (p : A => Boolean) :Boolean = this match {
       case Empty => false
@@ -48,7 +48,7 @@ sealed trait Stream[+A] {
       // Note 2. this is also tail recursive (because of the special semantics
       // of ||)
     }
-  
+
   //def find (p :A => Boolean) :Option[A] = this.filter (p).headOption
   def toList :List[A] = this match {
     case Empty => List[A]()
@@ -59,7 +59,7 @@ sealed trait Stream[+A] {
     case Empty => Empty
     case Cons(h,t) => if(n <= 0) Empty else Stream.cons(h(),t().take(n-1))
   }
-  
+
   def drop (n:Int) :Stream[A] = this match {
     case Empty => Empty
     case Cons(_,t) => if(n <= 0) t() else t().drop(n-1)
@@ -86,6 +86,26 @@ sealed trait Stream[+A] {
   def append[B>:A](that: => Stream[B]) :Stream[B] = this.foldRight(that)((a,b) => Stream.cons(a,b))
 
   def flatMap[B](f: A => Stream[B]) :Stream[B] = this.foldRight(Stream[B]())((a,b) => f(a).append(b))
+
+  def mapUnfold [B](f: A => B) = unfold(this)((s:Stream[A]) => s match {
+    case Cons(h,t) => Some((f(h()),t()))
+    case _ => None
+  })
+
+  def takeUnfold(n:Int) :Stream[A] = unfold((this,n))((s:(Stream[A],Int)) => s match {
+    case (Cons(h,t),x) if(x > 0) =>  Some((h(),(t(),x-1)))
+    case _ => None
+  })
+
+  def takeWhileUnfold(p: A => Boolean) : Stream[A] = unfold(this)((s:Stream[A]) => s match { 
+    case Cons(h,t) if(p(h())) => Some((h(),t()))
+    case _ => None
+  })
+
+  def zipWithUnfold[B>:A,C>:B](f: (A,B) => C)(s2:Stream[B]) = unfold((this,s2))((st:(Stream[A],Stream[B])) => st match {
+    case (Cons(h1,t1),Cons(h2,t2)) => Some((f(h1(),h2()),(t1(),t2())))
+    case _ => None
+  })
 }
 
 
@@ -105,17 +125,31 @@ object Stream {
     Cons(() => head, () => tail)
   }
 
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match{
+    case Some((elem, next_elem)) => cons(elem, unfold(next_elem)(f))
+    case None => Empty
+  }
+
+
   def apply[A] (as: A*) :Stream[A] =
     if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
     // Note 1: ":_*" tells Scala to treat a list as multiple params
     // Note 2: pattern matching with :: does not seem to work with Seq, so we
     //         use a generic function API of Seq
-  
+
   def to (n: Int): Stream[Int] = if(n >= 0) Stream.cons(n, to(n-1))
                                  else Empty
   def from (n: Int): Stream[Int] = Stream.cons(n, from(n+1))
-  
+
+  lazy val fibs = {
+    def f (h: Int, t: Int) :Stream[Int] = cons(h, f(t, h+t))
+    f(0,1)
+  }
+  def fibsUnfold = unfold((0,1))((s:(Int,Int)) => Some(s._1,(s._2,s._1+s._2)))
+
+  def fromUnfold (n: Int) = unfold(n)((s:Int) => Some(s,s+1))
+
 }
 
 // vim:tw=0:cc=100:nowrap
