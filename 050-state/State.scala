@@ -136,16 +136,26 @@ case class State[S, +A](run: S => (A, S)) {
   // Exercise 9 (6.10)
 
   def map[B](f: A => B): State[S, B] = {
-    def run2 = s:S =>{
+    def run2 = (s:S) =>{
       val (a, s2) = run(s)
       (f(a),s2)
     }
-    State[A, B](run2)
+    State[S, B](run2)
   }
 
-  // def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = ...
+  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = {
+    def run2 = (s:S) => {
+      val(a,s2) = run(s)
+      val(b,s3) = sb.run(s2)
+      (f(a, b),s3)
+      }
+    State[S, C](run2)
+  }
 
-  // def flatMap[B](f: A => State[S, B]): State[S, B] = State(s => { ...
+  def flatMap[B](f: A => State[S, B]): State[S, B] = State(s => {
+    val (a,s2) = run(s)
+    f(a).run(s2)
+  })
 
 }
 
@@ -157,7 +167,17 @@ object State {
 
   // Exercise 9 (6.10) continued
 
-  // def sequence[S,A](sas: List[State[S, A]]): State[S, List[A]] = ...
+  def sequence[S,A](sas: List[State[S, A]]): State[S, List[A]] = 
+    if(sas.isEmpty) State( s => {
+        (List[A](),s)
+      })
+    else{
+      State( s => {
+        val(a, s2) = sas.head.run(s)
+        val(tail, s3) = sequence(sas.tail).run(s2)
+        (a :: tail, s3)
+      })
+    }
   //
   // This is given in the book:
 
@@ -175,11 +195,14 @@ object State {
 
   // Exercise 10
 
-  // def state2stream[S,A] (s :State[S,A]) (seed :S) :Stream[A] = ...
+  def state2stream[S,A] (s :State[S,A]) (seed :S) :Stream[A] ={
+    val(a,s2) = s.run(seed)
+    Stream.cons(a, state2stream(s)(s2))
+  }
 
   // Exercise 11
 
-  // val random_integers = ...
+  val random_integers = state2stream(State[RNG,Int](rng => rng.nextInt))(RNG.Simple(0))
 
 }
 
