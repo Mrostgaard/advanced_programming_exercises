@@ -1,3 +1,4 @@
+package stateful
 trait RNG {
   def nextInt: (Int, RNG)
 }
