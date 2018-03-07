@@ -83,7 +83,29 @@ sealed trait Stream[+A] {
 
   def filter(p: A => Boolean) :Stream[A] = this.foldRight(Stream[A]())((a,b) => if(p(a)) b else Stream.cons(a,b))
 
+  def append[B>:A](that: => Stream[B]) :Stream[B] = this.foldRight(that)((a,b) => Stream.cons(a,b))
 
+  def flatMap[B](f: A => Stream[B]) :Stream[B] = this.foldRight(Stream[B]())((a,b) => f(a).append(b))
+
+  def mapUnfold [B](f: A => B) = unfold(this)((s:Stream[A]) => s match {
+    case Cons(h,t) => Some((f(h()),t()))
+    case _ => None
+  })
+
+  def takeUnfold(n:Int) :Stream[A] = unfold((this,n))((s:(Stream[A],Int)) => s match {
+    case (Cons(h,t),x) if(x > 0) =>  Some((h(),(t(),x-1)))
+    case _ => None
+  })
+
+  def takeWhileUnfold(p: A => Boolean) : Stream[A] = unfold(this)((s:Stream[A]) => s match { 
+    case Cons(h,t) if(p(h())) => Some((h(),t()))
+    case _ => None
+  })
+
+  def zipWithUnfold[B>:A,C>:B](f: (A,B) => C)(s2:Stream[B]) = unfold((this,s2))((st:(Stream[A],Stream[B])) => st match {
+    case (Cons(h1,t1),Cons(h2,t2)) => Some((f(h1(),h2()),(t1(),t2())))
+    case _ => None
+  })
 }
 
 
@@ -124,7 +146,9 @@ object Stream {
     def f (h: Int, t: Int) :Stream[Int] = cons(h, f(t, h+t))
     f(0,1)
   }
+  def fibsUnfold = unfold((0,1))((s:(Int,Int)) => Some(s._1,(s._2,s._1+s._2)))
 
+  def fromUnfold (n: Int) = unfold(n)((s:Int) => Some(s,s+1))
 
 }
 

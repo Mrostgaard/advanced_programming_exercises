@@ -35,10 +35,10 @@ val naturals = from(0)
 //assert(naturals.forAll(_ >= 0))
 
 //Exercise 6
-/*
 val naturals2 = naturals.takeWhileFold(_<1000000000).drop(100).take(50).toList
-print(naturals2)
-*/
+val naturals3 = naturals.takeWhileUnfold(_<1000000000).drop(100).take(50).toList
+println(naturals2)
+println(naturals3)
 
 //Exercise 7
 /*
@@ -51,9 +51,13 @@ assert(headOption1 == Some(6))
 */
 //Exercise 8
 /*
+ */
 //1
 println(naturals.map(_*2).drop(30).take(50).toList)
+println(naturals.mapUnfold(_*2).drop(30).take(50).toList)
+println(naturals.mapUnfold(_*2).drop(30).takeUnfold(50).toList)
 //2
+/*
 println(naturals.drop(42).filter(_%2 == 0).take(30).toList)
 //3
 println(naturals.append(naturals))
@@ -71,3 +75,8 @@ In a list we would filter list first and then make the head of the list a headOp
 //Exercise 10
 val fibz = fibs.take(10).toList
 println(fibz)
+println(fibsUnfold.take(10).toList)
+
+//Exervise 11
+assert(from(1).take(100000000).drop(41).take(10).toList == fromUnfold(1).take(100000000).drop(41).take(10).toList)
+println(fromUnfold(1).take(10).toList)
