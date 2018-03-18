@@ -57,13 +57,13 @@ object Par {
     val fbs: List[Par[B]] = ps.map(asyncF(f))
     sequence(fbs)
   }
-
+/*
   def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = as match {
     case Nil => unit(Nil)
     case x :: xs if(f(x)) => parFilter(xs)(f)
     case x :: xs => map2(lazyUnit(x), fork(parFilter(xs)))((a,b) => a :: b)
   }
-
+*/
 
   // Exercise 4: implement map3 using map2
 
