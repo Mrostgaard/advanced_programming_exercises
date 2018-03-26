@@ -185,9 +185,9 @@ case class Prop (run :(TestCases,RNG) => Result) {
 
   // (Exercise 7)
 
-  // def && (that :Prop) :Prop = Prop { if(this.Result.isFalsified && that.Result) Prop{}}
+  def && (that :Prop) :Prop = Prop((tc,rn) => if(this.run(tc,rn).isFalsified && that.run(tc,rn).isFalsified) Falsified("Both failed",0) else Passed)
 
-  // def || (that :Prop) :Prop = Prop { ... }
+  def || (that :Prop) :Prop = Prop((tc,rn) => if(this.run(tc,rn).isFalsified || that.run(tc,rn).isFalsified) Falsified("One failed",0) else Passed)
 
 }
 
