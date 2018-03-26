@@ -1,7 +1,8 @@
 // Advanced Programming 2015
 // Andrzej Wasowski, IT Univesity of Copenhagen
 
-
+// matho@itu.dk
+// mrom@itu.dk
 // 1. Introduction
 //
 // This file is best worked on by reading exercise descriptions in the
