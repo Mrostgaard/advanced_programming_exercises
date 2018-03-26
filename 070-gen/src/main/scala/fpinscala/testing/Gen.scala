@@ -64,16 +64,16 @@ case class Gen[A] (sample :State[RNG,A]) {
 
   // Exercise 4 (Ex. 8.6 [Chiusano, Bjarnasson 2015])
 
-  // def flatMap[B] (f: A => Gen[B]) :Gen[B] = ...
+  def flatMap[B] (f: A => Gen[B]) :Gen[B] = Gen(this.sample.flatMap(x => f(x).sample))
 
 
   // It would be convenient to also have map (uncomment once you have unit and flatMap)
 
-  // def map[B] (f : A => B) :Gen[B] = this.flatMap (a => Gen.unit[B] (f(a)))
+  def map[B] (f : A => B) :Gen[B] = this.flatMap (a => Gen.unit[B] (f(a)))
 
   // Exercise 5 (Second part of Ex. 8.6)
 
-  // def listOfN(size: Gen[Int]): Gen[List[A]] = ...
+  def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(x => Gen(State.sequence(List.fill(x) (this.sample))))
 
   // Exercise 6 (Ex. 8.7; I implemented it as a method, the book asks for a
   // function, the difference is minor; you may want to have both for
@@ -82,7 +82,11 @@ case class Gen[A] (sample :State[RNG,A]) {
   // Hint: we already have a generator that emulates tossing a coin. Which one
   // is it? Use flatMap with it.
 
-  // def union (that :Gen[A]) :Gen[A] = ...
+  def union (that :Gen[A]) :Gen[A] = Gen.boolean.flatMap(b => if(b){
+    Gen(this.sample)
+  } else {
+    Gen(that.sample)
+  })
 
   // Exercise 7 continues in the bottom of the file (in the companion object)
 }
@@ -181,7 +185,7 @@ case class Prop (run :(TestCases,RNG) => Result) {
 
   // (Exercise 7)
 
-  // def && (that :Prop) :Prop = Prop { ... }
+  // def && (that :Prop) :Prop = Prop { if(this.Result.isFalsified && that.Result) Prop{}}
 
   // def || (that :Prop) :Prop = Prop { ... }
 
