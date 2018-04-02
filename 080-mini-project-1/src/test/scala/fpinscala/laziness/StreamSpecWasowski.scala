@@ -16,8 +16,8 @@ import Arbitrary.arbitrary
 // fail on them :)
 
 import stream00._    // uncomment to test the book solution
-// import stream01._ // uncomment to test the broken headOption implementation
-// import stream02._ // uncomment to test another version that breaks headOption
+//import stream01._ // uncomment to test the broken headOption implementation
+//import stream02._ // uncomment to test another version that breaks headOption
 
 class StreamSpecWasowski extends FlatSpec with Checkers {
 
@@ -50,5 +50,20 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s :Stream[Int]) => s.headOption != None } )
 
   }
+
+//  behavior of "drop"
+
+  it should "s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("case 1" |:
+      Prop.forAll { (s :Stream[Int], n :Int, m :Int) => s.drop(Math.abs(n)).drop(Math.abs(m)) == s.drop(Math.abs(n)+Math.abs(m)) } )
+  }
+
+
+  it should "map terminates on infinite streams" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (Stream.from(0))
+    ("infinite stream" |: Prop.forAll {(s :Stream[Int]) => s.map( _ * 2 );true})
+  }
+
 
 }
