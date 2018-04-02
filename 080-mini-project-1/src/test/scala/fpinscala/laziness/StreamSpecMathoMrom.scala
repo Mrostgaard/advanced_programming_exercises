@@ -102,20 +102,19 @@ class StreamSpecMathoMrom extends FlatSpec with Checkers {
     })
   }
   
-  it should "should conform to " in check{
+  it should "should conform to idempotency" in check{
      // the implict makes the generator available in the context
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
     ("infinite stream" |:
       Prop.forAll { (n :Int) =>{
-        val i = n/2 + Math.abs(n/2)
+        val i = (n/2 + Math.abs(n/2)) % 1000
         val s = from(0)
-        s.take(i).take(i) == s.take(i) }} ) &&
+        s.take(i).take(i).toList == s.take(i).toList }} ) &&
     ("singleton" |:
       Prop.forAll { (n :Int) =>{
-      //val i = n/2 + Math.abs(n/2)
         val s = cons(1, empty);
-        s.take(1).take(1) == s.take(1) }} ) &&
+        s.take(1).take(1).toList == s.take(1).toList }} ) &&
     ("random" |:
-      Prop.forAll { (s :Stream[Int]) => s.take(10).take(10) == s.take(10) } )
+      Prop.forAll { (s :Stream[Int]) => s.take(10).take(10).toList == s.take(10).toList } )
   }
 }
