@@ -44,7 +44,7 @@ class StreamSpecMathoMrom extends FlatSpec with Checkers {
   def genFailByNStream[A] (n:Int, a:A, f: A => A) : Stream[A] =
     if(n <= 0) throw new IllegalStateException("N+1 was evaluated")
     else cons(f(a), genFailByNStream(n-1,f(a),f))
-  
+
   lazy val errorStream = {
     cons(throw new IllegalStateException("Head was evaluated"),
       throw new IllegalStateException("Tail was evaluated")) 
@@ -117,4 +117,28 @@ class StreamSpecMathoMrom extends FlatSpec with Checkers {
     ("random" |:
       Prop.forAll { (s :Stream[Int]) => s.take(10).take(10).toList == s.take(10).toList } )
   }
+
+  behavior of "drop"
+
+  it should "s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("case 1" |:
+      Prop.forAll { (s :Stream[Int], n :Int, m :Int) =>{
+        val i = if(n > 0) Math.abs(n)/2 else Math.abs(n+1)/2
+        val j = if(m > 0) Math.abs(m)/2 else Math.abs(m+1)/2
+        s.drop(i).drop(j) == s.drop(i+j) }} )
+  }
+
+  it should "does not force dropped elements head" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("case 1" |:
+      Prop.forAll { (s :Stream[Int]) => cons(arbFail[Int]("Evaluated head"), s).drop(1);true} )
+  }
+
+  it should "map terminates on infinite streams" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (Stream.from(0))
+    ("infinite stream" |: Prop.forAll {(s :Stream[Int]) => s.map( _ * 2 );true})
+  }
+
+
 }
