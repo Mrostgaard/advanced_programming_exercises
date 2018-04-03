@@ -67,8 +67,7 @@ class StreamSpecMathoMrom extends FlatSpec with Checkers {
       Prop.forAll { (s :Stream[Int]) => s.headOption != None } )
 
   }
-  //Since the stream of natural numbers is infinite, and recursively defined, this test should break
-  //if the tail is forced to be calculated.
+  //if the tail is forced to be calculated, this test will throw an error message.
   it should "return the head of the stream, without evaluating the whole stream" in {
     assert(cons(0,arbFail[Int]("Evaluated tail")).headOption == Some(0))
   }
@@ -122,23 +121,49 @@ class StreamSpecMathoMrom extends FlatSpec with Checkers {
 
   it should "s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)" in check {
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
-    ("case 1" |:
+    ("random stream" |:
       Prop.forAll { (s :Stream[Int], n :Int, m :Int) =>{
         val i = if(n > 0) Math.abs(n)/2 else Math.abs(n+1)/2
         val j = if(m > 0) Math.abs(m)/2 else Math.abs(m+1)/2
+        s.drop(i).drop(j) == s.drop(i+j) }} ) &&
+    ("infinite stream" |:
+      Prop.forAll { (n :Int, m :Int) =>{
+        val s = from(0)
+        val i = if(n > 0) Math.abs(n)/2 % 1000 else Math.abs(n+1)/2 % 100
+        val j = if(m > 0) Math.abs(m)/2 % 1000 else Math.abs(m+1)/2 % 1000
         s.drop(i).drop(j) == s.drop(i+j) }} )
   }
 
-  it should "does not force dropped elements head" in check {
+  it should "not force dropped elements head" in check {
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
     ("case 1" |:
       Prop.forAll { (s :Stream[Int]) => cons(arbFail[Int]("Evaluated head"), s).drop(1);true} )
   }
+
+  behavior of "map"
 
   it should "map terminates on infinite streams" in check {
     implicit def arbIntStream = Arbitrary[Stream[Int]] (Stream.from(0))
     ("infinite stream" |: Prop.forAll {(s :Stream[Int]) => s.map( _ * 2 );true})
   }
 
+  behavior of "append"
 
+  it should "conform to additivity, s.append(n).append(m) == s.append(n.append(m))" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("random streams" |:
+    Prop.forAll {(s :Stream[Int], n :Stream[Int], m :Stream[Int]) => s.append(n).append(m).toList == s.append(n.append(m)).toList } )  
+  }
+
+  it should "not force appended tail" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("random stream" |:
+    Prop.forAll {(s :Stream[Int]) => s.append( cons(arbFail[Int]("Appended head"), arbFail[Int]("Appended tail")));true} )  
+  } 
+
+  it should "not force tail of original stream" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("random stream" |:
+    Prop.forAll {(s :Stream[Int]) => cons(0, arbFail[Int]("Original tail")).append(s);true} )  
+  }
 }
