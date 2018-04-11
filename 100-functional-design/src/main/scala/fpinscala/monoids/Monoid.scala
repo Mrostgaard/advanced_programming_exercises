@@ -1,3 +1,4 @@
+
 // Advanced Programming 2015
 // Andrzej Wasowski, IT University of Copenhagen
 package fpinscala.monoids
@@ -26,14 +27,33 @@ object Monoid {
 
   // Exercise 1
 
-  // val intAddition =
-  // val intMultiplication =
-  // val booleanOr =
-  // val booleanAnd =
+  val intAddition = new Monoid[Int]{
+    def op (x: Int, y: Int) = x + y
+    val zero = 0
+  }
+  val intMultiplication = new Monoid[Int]{
+    def op(x: Int, y: Int) = x * y
+    val zero = 1
+  }
+
+  val booleanOr = new Monoid[Boolean] {
+    def op(x: Boolean, y: Boolean) = x || y
+    val zero = false
+  }
+
+  val booleanAnd = new Monoid[Boolean] {
+    def op(x: Boolean, y: Boolean) = x && y
+    val zero = true
+  }
 
   // Exercise 2
 
-  // def optionMonoid[A] = ...
+  def optionMonoid[A] = new Monoid[A] {
+    def op(l: A, r: A) = l match {
+      case None => r
+      case _ => l
+    }
+  }
 
   def dual[A] (m :Monoid[A]) = new Monoid[A] {
     def op (a1: A, a2: A) = m.op(a2,a1)
