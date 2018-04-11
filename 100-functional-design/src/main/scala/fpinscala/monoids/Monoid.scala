@@ -48,11 +48,9 @@ object Monoid {
 
   // Exercise 2
 
-  def optionMonoid[A] = new Monoid[A] {
-    def op(l: A, r: A) = l match {
-      case None => r
-      case _ => l
-    }
+  def optionMonoid[A] = new Monoid[Option[A]] {
+    def op(l: Option[A], r: Option[A]) = if(l == None) r else l
+    val zero = None
   }
 
   def dual[A] (m :Monoid[A]) = new Monoid[A] {
@@ -61,7 +59,10 @@ object Monoid {
   }
 
   // Exercise 3
-  // def endoMonoid[A] =
+  def endoMonoid[A]: Monoid[A => A] = new Monoid[A => A] {
+    def op (a: A => A, b: A => A) = a andThen b
+    val zero = (a: A) => a
+  }
 
   // Exercise 4 is solved in MonoidSpec.scala
 
@@ -100,7 +101,7 @@ object Foldable extends Foldable[List] {
   def foldRight[A,B] (as: List[A]) (b: B) (f: (A,B) => B): B =
     if(as.isEmpty) b else foldRight(as.tail)(f(as.head,b))(f)
 
-  def foldLeft[A,B] (as: List[A]) (b: B) (f: (B,A) => B): B = 
+  def foldLeft[A,B] (as: List[A]) (b: B) (f: (B,A) => B): B =
     if(as.isEmpty) b else f(foldLeft(as.tail)(b)(f), as.head)
 
   def foldMap[A,B] (as: List[A]) (f: A => B) (mb: Monoid[B]): B =
