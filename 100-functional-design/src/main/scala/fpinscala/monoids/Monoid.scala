@@ -28,28 +28,28 @@ object Monoid {
   // Exercise 1
 
   val intAddition = new Monoid[Int]{
-    def op (x: Int, y: Int) = x + y
+    def op (a: Int, b: Int) = a + b
     val zero = 0
   }
   val intMultiplication = new Monoid[Int]{
-    def op(x: Int, y: Int) = x * y
+    def op(a: Int, b: Int) = a * b
     val zero = 1
   }
 
   val booleanOr = new Monoid[Boolean] {
-    def op(x: Boolean, y: Boolean) = x || y
+    def op(a: Boolean, b: Boolean) = a || b
     val zero = false
   }
 
   val booleanAnd = new Monoid[Boolean] {
-    def op(x: Boolean, y: Boolean) = x && y
+    def op(a: Boolean, b: Boolean) = a && b
     val zero = true
   }
 
   // Exercise 2
 
   def optionMonoid[A] = new Monoid[Option[A]] {
-    def op(l: Option[A], r: Option[A]) = if(l == None) r else l
+    def op(a: Option[A], b: Option[A]) = if(a == None) b else a
     val zero = None
   }
 
