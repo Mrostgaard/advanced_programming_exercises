@@ -1,0 +1,5 @@
+[0m[[0m[31merror[0m] [0m[0m/Users/rostgaard/ITU/Kandidat/2. semester/Advanced programming/excersises/070-gen/src/main/scala/fpinscala/testing/Gen.scala:62:18: missing arguments for method fill in class GenTraversableFactory;[0m
+[0m[[0m[31merror[0m] [0m[0mfollow this method with `_' if you want to treat it as a partially applied function[0m
+[0m[[0m[31merror[0m] [0m[0m    Gen(List.fill(n))[0m
+[0m[[0m[31merror[0m] [0m[0m                 ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
