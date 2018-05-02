@@ -59,92 +59,106 @@ object ExceptionEvaluator {
 //
 // // Section 2.3 [Wadler] Variation two: State
 //
-// object StateEvaluator {
-//
-//   type State = Int
-//   case class M[+A] (step: State => (A,State))
-//
-//   // TODO: complete the implementation of the evaluator as per the spec in the
-//   // paper.
-//   def eval (term :Term) :M[Int] = term match {
-//     case Cons (a) => M[Int] (x => (a,x))
-//     case Div (t,u) => ...
-//   }
-//
-// }
+object StateEvaluator {
+
+  type State = Int
+  case class M[+A] (step: State => (A,State))
+
+   // TODO: complete the implementation of the evaluator as per the spec in the
+   // paper.
+  def eval (term :Term) :M[Int] = term match {
+    case Cons (a) => M[Int] (x => (a,x))
+    case Div (t,u) => eval(t) match {
+      case M(s1) => 
+        val(x:Int,y:State) = eval(u) match {
+          case M(s2) => s2(0)   
+        };
+        val(i:Int,j:State) = s1(y);
+        M[Int]( z => (i/x, y+j+z+1))
+    }
+  }
+}
 //
 // // Section 2.4 [Wadler] Variation three: Output
 //
-// object OutputEvaluator {
-//
-//   type Output = String
-//   case class M[+A] (o: Output, a: A)
-//
-//   def line (a :Term) (v :Int) :Output =
-//     "eval(" + a.toString + ") <= " + v.toString + "\n"
-//
-//   // TODO: complete the implementation of the eval function
-//   def eval (term :Term) :M[Int] = ...
-// }
-//
-// // Section 2.5 [Wadler] A monadic evaluator
-//
-// // The following are two generic monadic interfaces (one for classes, one for
-// // meta-classes/objects) that we will use to type check our monadic solutions.
-// //
-// // We shall provide flatMap and map for our monads to be able to use for
-// // comprehensions in Scala.
-// //
-// // IMPORTANT: flatMap is called "(*)" in the paper.
-//
-// trait Monad[+A,M[_]] {
-//   def flatMap[B] (k: A => M[B]) :M[B]
-//   def map[B] (k: A => B) :M[B]
-// }
-//
-// // we will provide unit, as the paper does. This will be placed in a companion
-// // object.
-//
-// trait MonadOps[M[_]] { def unit [A] (a :A) :M[A] }
-//
-// // The above abstract traits will be used to constraint types of all our monadic
-// // implementations, just to ensure better type safety and uniform interfaces.
-//
-//
-//
-// // Now we are startin to implement the monadic evaluator from the paper.
-// // Compare this implementation to the paper, and make sure that you understand
-// // the Scala rendering.
-//
-// // Section 2.6 [Wadler] Variation zero, revisited: The basic evaluator
-//
-// object BasicEvaluatorWithMonads {
-//
-//   // We enrich our M type with flatMap and map;
-//   // A flatMap is already in the paper (called *)
-//   // I add map, so that we can use for comprehensions with this type
-//   case class M[+A] (a: A) extends Monad[A,M] {
-//     def flatMap[B] (k: A => M[B]) :M[B] = k (this.a)
-//     def map[B] (k: A => B) :M[B] = M.unit (k (this.a))
-//   }
-//
-//   // The paper also uses unit, so we put it in the companion object
-//   object M extends MonadOps[M] { def unit[A] (a : A) :M[A] = M[A] (a) }
-//
-//   def eval (term: Term) :M[Int] = term match {
-//     case Cons (a) => M.unit (a)
-//     case Div (t,u) => for {
-//       a <- eval (t)
-//       b <- eval (u)
-//       r <- M.unit (a/b)
-//     } yield r
-//   }
-//   // TODO: Make sure that you understand the above implementation (an dhow it
-//   // relates to the one in the paper). If you find the for comprehension to be
-//   // obscuring things, you may want to rewrite the above using just map and
-//   // flatMap.
-// }
-//
+object OutputEvaluator {
+  type Output = String
+  case class M[+A] (o: Output, a: A)
+
+  def line (a :Term) (v :Int) :Output =
+    "eval(" + a.toString + ") <= " + v.toString + "\n"
+  
+  // TODO: complete the implementation of the eval function
+  def eval (term :Term) :M[Int] = term match {
+    case Cons (a) => M[Int](line(term)(a),a)
+    case Div (t,u) => eval(t) match {
+      case M(o, a) =>
+        val(p:Output,b:Int) = eval(u) match{
+          case M(p,b) => (p,b)
+        }
+      M[Int]( o + p + line(term)(a/b),a/b)
+    }
+  }
+}
+
+ // Section 2.5 [Wadler] A monadic evaluator
+
+ // The following are two generic monadic interfaces (one for classes, one for
+ // meta-classes/objects) that we will use to type check our monadic solutions.
+ //
+ // We shall provide flatMap and map for our monads to be able to use for
+ // comprehensions in Scala.
+ //
+ // IMPORTANT: flatMap is called "(*)" in the paper.
+
+ trait Monad[+A,M[_]] {
+   def flatMap[B] (k: A => M[B]) :M[B]
+   def map[B] (k: A => B) :M[B]
+ }
+
+ // we will provide unit, as the paper does. This will be placed in a companion
+ // object.
+
+ trait MonadOps[M[_]] { def unit [A] (a :A) :M[A] }
+
+ // The above abstract traits will be used to constraint types of all our monadic
+ // implementations, just to ensure better type safety and uniform interfaces.
+
+
+
+ // Now we are startin to implement the monadic evaluator from the paper.
+ // Compare this implementation to the paper, and make sure that you understand
+ // the Scala rendering.
+
+ // Section 2.6 [Wadler] Variation zero, revisited: The basic evaluator
+
+  object BasicEvaluatorWithMonads {
+
+   // We enrich our M type with flatMap and map;
+   // A flatMap is already in the paper (called *)
+   // I add map, so that we can use for comprehensions with this type
+   case class M[+A] (a: A) extends Monad[A,M] {
+     def flatMap[B] (k: A => M[B]) :M[B] = k (this.a)
+     def map[B] (k: A => B) :M[B] = M.unit (k (this.a))
+  }
+
+  // The paper also uses unit, so we put it in the companion object
+  object M extends MonadOps[M] { def unit[A] (a : A) :M[A] = M[A] (a) }
+
+  def eval (term: Term) :M[Int] = term match {
+    case Cons (a) => M.unit (a)
+    case Div (t,u) => for {
+      a <- eval (t)
+      b <- eval (u)
+      r <- M.unit (a/b)
+    } yield r
+  }
+   // TODO: Make sure that you understand the above implementation (an dhow it
+   // relates to the one in the paper). If you find the for comprehension to be
+   // obscuring things, you may want to rewrite the above using just map and
+   // flatMap.
+ }
+
 // // Section 2.7 [Wadler] The monadic evaluator with exceptions
 //
 // object ExceptionEvaluatorWithMonads {
