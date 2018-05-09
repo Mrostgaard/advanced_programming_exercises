@@ -6,7 +6,9 @@ import org.apache.spark.ml.feature.Tokenizer
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.explode
+import org.apache.spark.sql.functions.collect_set
 
 
 object Main {
@@ -68,7 +70,9 @@ object Main {
     val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
     val tokenizedReviews = tokenizer.transform(reviews).drop("text")
     
-    tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").show
+    val joinedReviews = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").groupBy("id").agg(collect_set("vec").alias("vec"))
+    //joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
+    
 
 		spark.stop
   }
