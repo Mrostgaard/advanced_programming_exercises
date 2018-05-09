@@ -6,6 +6,7 @@ import org.apache.spark.ml.feature.Tokenizer
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions.explode
 
 
 object Main {
@@ -64,10 +65,10 @@ object Main {
 
     // replace the following with the project code
     glove.show
-    val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
-    val tokenizedReviews = tokenizer.transform(reviews)
-    tokenizedReviews.col("words").map
-    tokenizedReviews.show
+    val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
+    val tokenizedReviews = tokenizer.transform(reviews).drop("text")
+    
+    tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").show
 
 		spark.stop
   }
