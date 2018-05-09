@@ -55,14 +55,19 @@ object Main {
 			.withColumnRenamed ("_2", "vec")
 			.as[Embedding]
 
+
+
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("path/to/glove/file") // FIXME
-    val reviews = loadReviews ("path/to/amazon/reviews/file") // FIXME
+    val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.100d.txt") // FIXME
+    val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
 
     // replace the following with the project code
     glove.show
-    reviews.show
+    val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
+    val tokenizedReviews = tokenizer.transform(reviews)
+    tokenizedReviews.col("words").map
+    tokenizedReviews.show
 
 		spark.stop
   }
