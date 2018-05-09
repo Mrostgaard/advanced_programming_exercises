@@ -6,11 +6,14 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession
 import scala.collection.mutable.WrappedArray
+import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.explode
 import org.apache.spark.sql.functions.collect_set
 import org.apache.spark.sql.functions._;
+import org.apache.spark.ml.classification.MultilayerPerceptronClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 
 
 
@@ -69,25 +72,41 @@ object Main {
 		val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
 
     val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
-    val tokenizedReviews = tokenizer.transform(reviews).drop("text")
-    //val tokenssss = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").withColumn("label", when($"overall" === 5.0 or $"overall" === 4.0, 2).when($"overall" === 3.0, 1).otherwise(0)).show
-    val joinedReviews = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").groupBy("id").agg(collect_set("vec").alias("vec"))
-    //joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
-    joinedReviews.map(row => {
-      val vecList:List[List[Double]] = row.getAs[WrappedArray[WrappedArray[Double]]](1).toList.map( arr => arr.toList)
-      (row.getAs[Int](0), vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => acc.zip(nextList).map(t => t._1 + t._2)).map((x:Double) => x/vecList.length))
-    }).show
     
-		//joinedReviews.show
-    /*
-    val tmp = joinedReviews.filter($"id" === 148).rdd.foreach(t => {
-      val vecList:List[List[Double]] = t.getAs[List[List[Double]]](1)
-    })
-    */
+    val tokenizedReviews = tokenizer.transform(reviews).drop("text")
+    
+    val labels = tokenizedReviews.withColumn("label", when($"overall" === 5.0 or $"overall" === 4.0, 2).when($"overall" === 3.0, 1).otherwise(0))
+    
+    val joinedReviews = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").groupBy("id").agg(collect_set("vec").alias("vec"))
+    
+    val reviewVectors = joinedReviews.map(row => {
+      val vecList:List[List[Double]] = row.getAs[WrappedArray[WrappedArray[Double]]](1).toList.map( arr => arr.toList)
+      (row.getAs[Int](0), Vectors.dense(vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => acc.zip(nextList).map(t => t._1 + t._2)).map((x:Double) => x/vecList.length).toArray))
+    }).withColumnRenamed("_1","id").withColumnRenamed("_2","features")
+    
+    val trainingData = labels.select("id","label").join(reviewVectors, "id")
 
-		//joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
+    val splits = trainingData.randomSplit(Array(0.9, 0.1), seed = 1234L)
+    val train = splits(0)
+    val test = splits(1)
+    
+    
+    val layers = Array[Int](50, 5, 4, 3)
 
+    val trainer = new MultilayerPerceptronClassifier()
+      .setLayers(layers)
+      .setBlockSize(128)
+      .setSeed(1234L)
+      .setMaxIter(100)
+    
+    val model = trainer.fit(train)
 
+    val result = model.transform(test)
+    val predictionAndLabels = result.select("prediction", "label")
+    val evaluator = new MulticlassClassificationEvaluator()
+      .setMetricName("accuracy")
+
+    println(s"Test set accuracy = ${evaluator.evaluate(predictionAndLabels)}")
     spark.stop
   }
 
