@@ -4,6 +4,7 @@
 
 import org.apache.spark.ml.feature.Tokenizer
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.types._
@@ -65,16 +66,20 @@ object Main {
     val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.100d.txt") // FIXME
     val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
 
-    // replace the following with the project code
-    glove.show
     val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
     val tokenizedReviews = tokenizer.transform(reviews).drop("text")
     
     val joinedReviews = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").groupBy("id").agg(collect_set("vec").alias("vec"))
     //joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
+    joinedReviews.map(row => {
+      row match {
+        //val vecList:List[List[Double]] = row.get(1).asInstanceOf[List[List[Double]]]
+        case Row(id:Int,vecList:List[List[Double]]) => println(id)//(id,vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
+      }
+    }).show
     
 
-		spark.stop
+    spark.stop
   }
 
 }
