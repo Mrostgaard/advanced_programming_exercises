@@ -1,15 +1,17 @@
 // Advanced Programming. Andrzej Wasowski. IT University
 // To execute this example, run "sbt run" or "sbt test" in the root dir of the project
 // Spark needs not to be installed (sbt takes care of it)
-
 import org.apache.spark.ml.feature.Tokenizer
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession
+import scala.collection.mutable.WrappedArray
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.explode
 import org.apache.spark.sql.functions.collect_set
+import org.apache.spark.sql.functions._;
+
 
 
 object Main {
@@ -63,21 +65,28 @@ object Main {
 
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.100d.txt") // FIXME
-    val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
+		val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.50d.txt") // FIXME
+		val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
 
     val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
     val tokenizedReviews = tokenizer.transform(reviews).drop("text")
-    
+    //val tokenssss = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").withColumn("label", when($"overall" === 5.0 or $"overall" === 4.0, 2).when($"overall" === 3.0, 1).otherwise(0)).show
     val joinedReviews = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").groupBy("id").agg(collect_set("vec").alias("vec"))
     //joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
     joinedReviews.map(row => {
-      row match {
-        //val vecList:List[List[Double]] = row.get(1).asInstanceOf[List[List[Double]]]
-        case Row(id:Int,vecList:List[List[Double]]) => println(id)//(id,vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
-      }
+      val vecList:List[List[Double]] = row.getAs[WrappedArray[WrappedArray[Double]]](1).toList.map( arr => arr.toList)
+      (row.getAs[Int](0), vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => acc.zip(nextList).map(t => t._1 + t._2)).map((x:Double) => x/vecList.length))
     }).show
     
+		//joinedReviews.show
+    /*
+    val tmp = joinedReviews.filter($"id" === 148).rdd.foreach(t => {
+      val vecList:List[List[Double]] = t.getAs[List[List[Double]]](1)
+    })
+    */
+
+		//joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
+
 
     spark.stop
   }
