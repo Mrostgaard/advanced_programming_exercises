@@ -9,6 +9,8 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.explode
 import org.apache.spark.sql.functions.collect_set
+import org.apache.spark.sql.functions._;
+
 
 
 object Main {
@@ -62,17 +64,20 @@ object Main {
 
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.100d.txt") // FIXME
-    val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
+		val glove  = loadGlove ("/Volumes/Storage/School\'n\'shit/glove.6B.50d.txt") // FIXME
+		val reviews = loadReviews ("/Volumes/Storage/School\'n\'shit/reviews_Amazon_Instant_Video_5.json") // FIXME
 
     // replace the following with the project code
     glove.show
     val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
     val tokenizedReviews = tokenizer.transform(reviews).drop("text")
-    
+    //val tokenssss = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").withColumn("label", when($"overall" === 5.0 or $"overall" === 4.0, 2).when($"overall" === 3.0, 1).otherwise(0)).show
     val joinedReviews = tokenizedReviews.withColumn("word", explode($"word")).join(glove,"word").groupBy("id").agg(collect_set("vec").alias("vec"))
-    //joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
-    
+		//joinedReviews.show
+		val tmp = joinedReviews.filter($"id" === 148).rdd.foreach(t => println(t.getAs[Seq[String]](1)))
+
+		//joinedReviews.collect().map((id:Int,vecList:List[List[Double]]) => vecList.tail.foldLeft(vecList.head)((acc:List[Double], nextList:List[Double]) => (acc, nextList).zipped.map(_ + _)))
+
 
 		spark.stop
   }
