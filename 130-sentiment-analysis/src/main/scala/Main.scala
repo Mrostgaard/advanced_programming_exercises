@@ -114,8 +114,10 @@ object Main {
       .setMetricName("accuracy")
     val metrics = new MulticlassMetrics(scoreAndLabels)
     println(s"Test set accuracy = ${evaluator.evaluate(predictionAndLabels)}")
+    println(s"Weighted precision: ${metrics.weightedPrecision}")
+    println(s"Weighted recall: ${metrics.weightedRecall}")
     println(s"Weighted F1 score: ${metrics.weightedFMeasure}")
-    
+    println(s"Weighted false positive rate: ${metrics.weightedFalsePositiveRate}")
     spark.stop
   }
 
