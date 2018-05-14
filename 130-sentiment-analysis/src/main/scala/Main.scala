@@ -71,7 +71,7 @@ object Main {
 
   def main(args: Array[String]) = {
 
-		val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.50d.txt") // FIXME
+		val glove  = loadGlove ("C:/Users/marku/Documents/glove.6B/glove.6B.300d.txt") // FIXME
 		val reviews = loadReviews ("C:/Users/marku/Documents/reviews_Amazon_Instant_Video_5/Amazon_Instant_Video_5.json") // FIXME
 
     val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("word")
@@ -91,12 +91,12 @@ object Main {
 
     trainingData.show
 
-    val splits = trainingData.randomSplit(Array(0.9, 0.1), seed = 1234L)
+    val splits = trainingData.randomSplit(Array(0.9, 0.1))//, seed = 1234L)
     val train = splits(0)
     val test = splits(1)
     
     
-    val layers = Array[Int](50, 30, 10, 3)
+    val layers = Array[Int](300, 30, 10, 3)
 
     val trainer = new MultilayerPerceptronClassifier()
       .setLayers(layers)
